@@ -1,0 +1,203 @@
+<head>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script>
+    window.onload = function() {
+      if (typeof web3 !== "undefined") {
+        window.web3 = new Web3(web3.currentProvider);
+        $('#connectionStatusOutput').text("Connected!");
+      }
+      else {
+        $('#connectionStatusOutput').text("Not connected :( Aborting.");
+        return;
+      }
+
+      window.contractInstance = web3.eth.contract(contractABI).at(contractAddress);
+
+      $('#userAddressOutput').text(web3.eth.accounts[0]);
+
+      web3.version.getNetwork(function(err, res) {
+        if (!err) { // I skip this later in this file. This is bad! Bad Logan
+          if (res == 1) {
+            $('#networkIDOutput').text("main net");
+          }
+          else if (res == 3) {
+            $('#networkIDOutput').text("Ropsten");
+          }
+        }
+        else {
+          console.log(err);
+        }
+      });
+
+      $('#contractAddressOutput').text(contractAddress);
+
+      window.contractInstance.DepositHolder({}, function(err, res) {
+        $('#DepositHolderOutput').text(res);
+      });
+      window.contractInstance.DepositSubmitter({}, function(err, res) {
+        $('#DepositSubmitterOutput').text(res);
+      });
+      web3.eth.getBalance(contractAddress, function(err, res) {
+        weiValue = res;
+        etherValue = web3.fromWei(res, 'ether');
+        $('#DepositBalanceOutput').text(etherValue.toString() + " ETH");
+      });
+    }
+
+    function depositEther() {
+      etherValue = Number(prompt("Depost how much ether?"));
+      weiValue = web3.toWei(etherValue, 'ether');
+      window.contractInstance.deposit({value:weiValue}, function(err, res) {
+        $('#transactions').html($('#transactions').html() + "deposit tx broadcasted: " + res + "<br>");
+      });
+    }
+
+    function releaseDeposit() {
+      window.contractInstance.returnDeposit({}, function(err, res) {
+        $('#transactions').html($('#transactions').html() + "release tx broadcasted: " + res + "<br>");
+      });
+    }
+
+    function confiscateDeposit() {
+      window.contractInstance.confiscateDeposit({}, function(err, res) {
+        $('#transactions').html($('#transactions').html() + "confiscate tx broadcasted: " + res + "<br>");
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <h2>Web3 Connection Info</h2>
+    Connection status: <span id="connectionStatusOutput"></span><br>
+    Network ID: <span id="networkIDOutput"></span><br>
+    User address: <span id="userAddressOutput"></span>
+  <h2>DepositManager contract info</h2>
+    Contract Address: <span id="contractAddressOutput"></span><br>
+    DepositHolder: <span id="DepositHolderOutput"></span><br>
+    DepositSubmitter: <span id="DepositSubmitterOutput"></span><br>
+    Contract Balance: <span id="DepositBalanceOutput"></span><br>
+  <h2>Controls</h2>
+    <button onclick="depositEther()">Deposit Ether</button>
+    <button onclick="releaseDeposit()">Release Deposit</button>
+    <button onclick="confiscateDeposit()">Confiscate Deposit</button>
+  <h2>Transactions Broadcasted</h2>
+    <span id="transactions"></span>
+
+</body>
+
+<script>
+// CONTRACT INFO
+
+contractAddress = "0x52b8C5bAB95574BB78C437047d89ceC439F39E80";
+contractABI = [
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "confiscateDeposit",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "deposit",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "EtherDeposited",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "EtherReturned",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "amountBurned",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "amountConfiscated",
+				"type": "uint256"
+			}
+		],
+		"name": "EtherConfiscated",
+		"type": "event"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "returnDeposit",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"name": "_DepositSubmitter",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "DepositHolder",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "DepositSubmitter",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+
+</script>
