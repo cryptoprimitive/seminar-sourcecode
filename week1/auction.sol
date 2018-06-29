@@ -32,6 +32,34 @@ contract Auction {
 
     Bid[] public bids;
 
+    constructor()
+    public {
+
+    }
+
+    function getNumberOfBids()
+    public
+    view
+    returns (uint numberOfBids) {
+        return bids.length;
+    }
+
+    function getHighestBidID()
+    public
+    view
+    returns (uint bidID) {
+        require(bids.length > 0);
+
+        uint highestAmount = 0;
+        uint highestID = 0;
+        for (uint i=0; i<bids.length; i++) {
+            if (bids[i].amount > highestAmount) {
+                highestAmount = bids[i].amount;
+                highestID = i;
+            }
+        }
+    }
+
     function makeBid(string _extraData)
     external
     payable
