@@ -1,0 +1,212 @@
+<head>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script>
+    window.onload = function() {
+      if (typeof web3 !== "undefined") {
+        window.web3 = new Web3(web3.currentProvider);
+        $('#connectionStatusOutput').text("Connected!");
+      }
+      else {
+        $('#connectionStatusOutput').text("Not connected :( Aborting.");
+        return;
+      }
+
+      window.contractInstance = web3.eth.contract(contractABI).at(contractAddress);
+
+      $('#userAddressOutput').text(web3.eth.accounts[0]);
+
+      web3.version.getNetwork(function(err, res) {
+        if (!err) { // I skip this later in this file. This is bad! Bad Logan
+          if (res == 1) {
+            $('#networkIDOutput').text("main net");
+          }
+          else if (res == 3) {
+            $('#networkIDOutput').text("Ropsten");
+          }
+        }
+        else {
+          console.log(err);
+        }
+      });
+
+
+      $('#contractAddressOutput').text(contractAddress);
+
+      window.contractInstance.getNumberOfBids({}, function(err, res) {
+        $('#numberOfBidsOutput').text(res);
+      });
+      window.contractInstance.getHighestBidID({}, function(err, res) {
+        $('#highestBidOutput').text(res);
+      });
+      /*web3.eth.getBalance(contractAddress, function(err, res) {
+        weiValue = res;
+        etherValue = web3.fromWei(res, 'ether');
+        $('#DepositBalanceOutput').text(etherValue.toString() + " ETH");
+      });*/
+    }
+
+    /*function depositEther() {
+      etherValue = Number(prompt("Depost how much ether?"));
+      weiValue = web3.toWei(etherValue, 'ether');
+      window.contractInstance.deposit({value:weiValue}, function(err, res) {
+        $('#transactions').html($('#transactions').html() + "deposit tx broadcasted: " + res + "<br>");
+      });
+    }
+
+    function releaseDeposit() {
+      window.contractInstance.returnDeposit({}, function(err, res) {
+        $('#transactions').html($('#transactions').html() + "release tx broadcasted: " + res + "<br>");
+      });
+    }
+
+    function confiscateDeposit() {
+      window.contractInstance.confiscateDeposit({}, function(err, res) {
+        $('#transactions').html($('#transactions').html() + "confiscate tx broadcasted: " + res + "<br>");
+      });
+    }*/
+  </script>
+</head>
+
+<body>
+  <h2>Web3 Connection Info</h2>
+    Connection status: <span id="connectionStatusOutput"></span><br>
+    Network ID: <span id="networkIDOutput"></span><br>
+    User address: <span id="userAddressOutput"></span>
+  <h2>Auction contract info</h2>
+    Contract Address: <span id="contractAddressOutput"></span><br>
+    Contract Balance: <span id="DepositBalanceOutput"></span><br>
+    <br>
+    # bids: <span id="numberOfBidsOutput"></span><br>
+    Highest bid: <span id="highestBidOutput"></span><br>
+  <!--
+    <h2>Controls</h2>
+      <button onclick="depositEther()">Deposit Ether</button>
+      <button onclick="releaseDeposit()">Release Deposit</button>
+      <button onclick="confiscateDeposit()">Confiscate Deposit</button>
+  -->
+  <h2>Transactions Broadcasted</h2>
+    <span id="transactions"></span>
+
+</body>
+
+<script>
+// CONTRACT INFO
+
+contractAddress = "0x62Fae143EBe274aF216860AeA16054893fBa5957";
+contractABI = [
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [
+			{
+				"name": "balance",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "bids",
+		"outputs": [
+			{
+				"name": "bidderAddress",
+				"type": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "extraData",
+				"type": "string"
+			},
+			{
+				"name": "valid",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getHighestBidID",
+		"outputs": [
+			{
+				"name": "bidID",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_extraData",
+				"type": "string"
+			}
+		],
+		"name": "makeBid",
+		"outputs": [
+			{
+				"name": "bidIterator",
+				"type": "uint256"
+			}
+		],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getNumberOfBids",
+		"outputs": [
+			{
+				"name": "numberOfBids",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "bidIterator",
+				"type": "uint256"
+			}
+		],
+		"name": "recallBid",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	}
+];
+
+</script>
