@@ -33,6 +33,8 @@ contract SubscriptionManager {
 
     event BillRateSet(address billerAddress, uint newRate);
     event BillProcessed(address billerAddress, uint amountBilled);
+    //TODO: BillProcessed should also log the rate, so billers can more easily verify
+    //      they've gotten what they're owed
 
     struct Biller {
         uint rate; // wei per second
