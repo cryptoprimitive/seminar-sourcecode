@@ -1,5 +1,14 @@
 pragma solidity ^0.4.24;
 
+contract SubscriptionManagerFactory {
+    function newSubscriptionManager()
+    external
+    returns (address) {
+        address newSMAddress = (new SubscriptionManager)(msg.sender);
+        return newSMAddress;
+    }
+}
+
 contract SubscriptionManager {
     address public Owner;
     modifier onlyOwner() {
@@ -7,8 +16,8 @@ contract SubscriptionManager {
         _;
     }
 
-    constructor() {
-        Owner = msg.sender;
+    constructor(address _Owner) {
+        Owner = _Owner;
     }
 
     event Deposit(address from, uint amount);
@@ -53,7 +62,7 @@ contract SubscriptionManager {
 
         billers[billerAddress].lastBillTime = now;
 
-        BillProcessed(billerAddress, billableAmount);
+        emit BillProcessed(billerAddress, billableAmount);
     }
 
     function callBill()
