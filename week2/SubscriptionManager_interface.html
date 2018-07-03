@@ -100,7 +100,8 @@
       billingRateInWeiPerMonth = web3.toWei(billingRateInEthPerMonth, 'ether');
       billingRateInWeiPerSecond = billingRateInWeiPerMonth/(30*24*60*60);
 
-      window.app.SMContractInstance.setBillRate(billerAddress, billingRateInWeiPerSecond, {}, function(err, res) {
+      txObject = {gas: 600000, gasPrice: web3.toWei(10, 'gwei')};
+      window.app.SMContractInstance.setBillRate(billerAddress, billingRateInWeiPerSecond, txObject, function(err, res) {
         if (err) {
           console.log("Error calling setBillRate: " + err);
         }
