@@ -248,7 +248,7 @@
 <script>
 // CONTRACT INFO
 
-SMFactoryAddress = "0x156E72176b48310876F9F4D773b7a6a7fb75b6d5";
+SMFactoryAddress = "0x6d540C9f4357FE128c6B3300a12A16B38a5bCB3b";
 SMFactoryABI = [
 	{
 		"constant": false,
@@ -262,6 +262,25 @@ SMFactoryABI = [
 		],
 		"payable": false,
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "subscriptionManagerAddresses",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
 		"type": "function"
 	}
 ];
