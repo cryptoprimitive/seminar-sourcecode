@@ -18,11 +18,16 @@
           SMAddressInput: "",
           SMOwner: "Loading...",
           billerAddressInput: "",
-          billingRateInput: ""
+          billingRateInput: "",
+          billingRateOutput: "Loading...",
+          lastBilledOutput: "Loading..."
         },
         computed: {
           SMContractInstance: function() {
             return web3.eth.contract(SMABI).at(this.SMAddressInput);
+          },
+          userIsOwner: function() {
+            return (web3.eth.accounts[0] == this.SMOwner);
           }
         },
         watch: {
@@ -36,6 +41,18 @@
               console.log(res);
               window.app.SMOwner = res;
             });
+          },
+          billerAddressInput: function() {
+            this.SMContractInstance.billers(this.billerAddressInput, function(err, res) {
+              billingRateInWeiPerSecond = res[0];
+              lastBilledTimestamp = res[1];
+
+              billingRateInEthPerSecond = web3.fromWei(billingRateInWeiPerSecond, 'ether');
+              billingRateInEthPerMonth = billingRateInEthPerSecond*(60*60*24*30);
+
+              window.app.billingRateOutput = Number(billingRateInEthPerMonth);
+              window.app.lastBilledOutput = Number(lastBilledTimestamp);
+            })
           }
         }
       });
@@ -83,7 +100,8 @@
     }
 
     function callNewSubscriptionManager() {
-      window.SMFactoryInstance.newSubscriptionManager({}, function(err, res) {
+      txObject = {gas: 600000, gasPrice: web3.toWei(20, 'gwei')};
+      window.SMFactoryInstance.newSubscriptionManager(txObject, function(err, res) {
         if (err) {
           console.log(err);
         }
@@ -93,10 +111,57 @@
       });
     }
 
+    function triggerDeposit() {
+      depositAmountInEth = prompt("Deposit how much? (ETH)");
+
+      depositAmountInWei = web3.toWei(depositAmountInEth, 'ether');
+
+      txObject = {value: depositAmountInWei,
+                  to: window.app.SMAddressInput,
+                  gasPrice: web3.toWei(10, 'gwei')};
+
+      web3.eth.sendTransaction(txObject, function(err, res) {
+        if (err) {
+          console.log("Error depositing ether: " + err);
+        }
+        else {
+          app.transactions.push("deposit tx: " + res);
+        }
+      });
+    }
+
+    function triggerWithdraw() {
+      withdrawAmountInEth = prompt("Withdraw how much? (ETH)");
+
+      withdrawAmountInWei = web3.toWei(withdrawAmountInEth, 'ether');
+
+      txObject = {gas: 600000, gasPrice: web3.toWei(10, 'gwei')};
+      window.app.SMContractInstance.withdraw(withdrawAmountInWei, txObject, function(err, res) {
+        if (err) {
+          console.log("Error calling withdraw: " + err);
+        }
+        else {
+          app.transactions.push("withdraw tx: " + res);
+        }
+      });
+    }
+
+    function callCallBill() {
+      txObject = {gas: 600000, gasPrice: web3.toWei(10, 'gwei')};
+      window.app.SMContractInstance.callBill(txObject, function(err, res) {
+        if (err) {
+          console.log("Error calling callBill: " + err);
+        }
+        else {
+          app.transactions.push("callBill tx: " + res);
+        }
+      });
+    }
+
     function callSetBillRate() {
       billerAddress = window.app.billerAddressInput;
 
-      billingRateInEthPerMonth = web3.toBigNumber(window.app.billingRateInput);
+      billingRateInEthPerMonth = web3.toBigNumber(prompt("New Billing Rate (Eth per 30 days)"));
       billingRateInWeiPerMonth = web3.toWei(billingRateInEthPerMonth, 'ether');
       billingRateInWeiPerSecond = billingRateInWeiPerMonth/(30*24*60*60);
 
@@ -160,12 +225,21 @@
         <br>
         QR code for depositing:<br>
         <div id="SMAddressQR"></div><br>
-        Owner: {{SMOwner}}
+        <button onclick="triggerDeposit()">deposit</button><br>
+        <br>
+        Owner: {{SMOwner}}<br>
+        <button onclick="triggerWithdraw()">withdraw</button><br>
+        <br>
+        <button onclick="callCallBill()">trigger bill</buton>
       </div>
-    <h2>Set Biller Permissions</h2>
-      Biller Address: <input v-model="billerAddressInput"><br>
-      Approved Billing Rate: <input v-model="billingRateInput"> ETH per 30 days<br>
-      <button onclick="callSetBillRate()">Set Permissions</button>
+    <h2>Biller Info</h2>
+      Address: <input v-model="billerAddressInput"><br>
+      <br>
+      Billing Rate: {{billingRateOutput}}<br>
+      Last Billed: {{lastBilledOutput}}<br>
+      <button v-show="userIsOwner" onclick="callSetBillRate()">Change Biller Rate</button>
+      <!--Approved Billing Rate: <input v-model="billingRateInput"> ETH per 30 days<br>
+      <button onclick="callSetBillRate()">Set Permissions</button>-->
 
   </div>
 
