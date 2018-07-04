@@ -84,7 +84,7 @@
 
     function callNewSubscriptionManager() {
       txObject = {gas: 600000, gasPrice: web3.toWei(20, 'gwei')};
-      window.SMFactoryInstance.newSubscriptionManager({}, function(err, res) {
+      window.SMFactoryInstance.newSubscriptionManager(txObject, function(err, res) {
         if (err) {
           console.log(err);
         }
