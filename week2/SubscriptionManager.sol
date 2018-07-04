@@ -1,10 +1,15 @@
 pragma solidity ^0.4.24;
 
 contract SubscriptionManagerFactory {
+    address[] public subscriptionManagerAddresses;
+
     function newSubscriptionManager()
     external
     returns (address) {
         address newSMAddress = (new SubscriptionManager)(msg.sender);
+
+        subscriptionManagerAddresses.push(newSMAddress);
+
         return newSMAddress;
     }
 }
