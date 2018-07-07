@@ -32,37 +32,46 @@
     <div id="app">
       <h2>Create New SubscriptionManager</h2>
         <button class="btn btn-primary" onclick="callNewSubscriptionManager()">Create New SubscriptionManager</button>
-      <h2>Interact</h2>
-        <div class="mainBlock console">
-          <div class="well well-sm row">
-            SubscriptionManager contract address: <input v-model="SMAddressInput"><br>
-            <div v-show="SMAddressInput != ''" id="SMInterface">
-              <br>
-              QR code for depositing:<br>
-              <div id="SMAddressQR"></div><br>
-              <button onclick="triggerDeposit()">deposit</button><br>
-              <br>
-              Owner: {{SMOwner}}<br>
-              <button onclick="triggerWithdraw()">withdraw</button><br>
-              <br>
-              <button onclick="callCallBill()">trigger bill</buton>
-            <h2>Biller Info</h2>
-            Address: <input v-model="billerAddressInput"><br>
-            <br>
-            Billing Rate: {{billingRateOutput}}<br>
-            Last Billed: {{lastBilledOutput}}<br>
-            <button v-show="userIsOwner" onclick="callSetBillRate()">Change Biller Rate</button>
-          </div>
+      <div class="addressInputBlock">
+        <div class="well well-sm">
+          SubscriptionManager contract address:<br><input v-model="SMAddressInput">
         </div>
       </div>
-      <h2>Transactions Broadcasted</h2>
-        <div class="mainBlock transactions">
-          <div class="well well-sm row">
-            <div v-for="transaction in transactions">
-              {{transaction}}<br>
+      <div v-show="SMAddressInput != ''" id="SMInterface" class="mainBlock console row">
+        <div class="col-sm-6">
+          <h2>Deposit/Withdraw</h2>
+            <div class="well well-sm">
+              QR code for depositing:<br>
+              <div id="SMAddressQR"></div><br>
+              <button class="btn btn-primary" onclick="triggerDeposit()">deposit</button><br>
+              <br>
+              Owner: {{SMOwner}}<br>
+              <button class="btn btn-primary" onclick="triggerWithdraw()">withdraw</button><br>
+              <br>
+            </div>
+        </div>
+        <div class="col-sm-6">
+          <h2>Billing</h2>
+            <div class="well well-sm">
+                <button class="btn btn-primary" onclick="callCallBill()">trigger bill</button>
+              Address: <input v-model="billerAddressInput"><br>
+              <br>
+              Billing Rate: {{billingRateOutput}}<br>
+              Last Billed: {{lastBilledOutput}}<br>
+              <button class="btn btn-primary" v-show="userIsOwner" onclick="callSetBillRate()">Change Biller Rate</button>
+            </div>
+        </div>
+      </div>
+      <div class="row" v-if="transactions.length > 0">
+        <h2>Transactions Broadcasted</h2>
+          <div class="mainBlock transactions">
+            <div class="well well-sm row">
+              <div v-for="transaction in transactions">
+                {{transaction}}<br>
+              </div>
             </div>
           </div>
-        </div>
+      </div>
 
 
     </div>

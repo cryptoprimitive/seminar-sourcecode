@@ -44,6 +44,12 @@ h2 {
   margin-bottom: -20px;
 }
 
+.addressInputBlock {
+  max-width: 450px;
+  width: 100%;
+  display: block;
+  margin: 0 auto;
+}
 
 /*max-width for large screens*/
 .mainBlock {
