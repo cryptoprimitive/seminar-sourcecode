@@ -12,6 +12,9 @@
 
 <body>
   <div class="container-fluid site-main">
+    <div class="header" >
+      <div class="title" align='center' ><h1 >SubscriptionManager Console</h1></div>
+    </div>
     <div class ="warnings" hidden='true' >
       <div id="noWeb3AccountWarning" hidden='true' align='center' class = "row">
         <div class="alert alert-danger col-md-offset-3 col-md-6" style='display:inline-block;'>
@@ -27,12 +30,8 @@
       </div>
     </div>
     <div id="app">
-      Connection status: {{connectionStatusOutput}}<br>
-      <h2>Web3 Connection Info</h2>
-        Network ID: {{networkIDOutput}}<br>
-        User address: {{userAddressOutput}}
       <h2>Create New SubscriptionManager</h2>
-        <button onclick="callNewSubscriptionManager()">Create New SubscriptionManager</button>
+        <button class="btn btn-primary" onclick="callNewSubscriptionManager()">Create New SubscriptionManager</button>
       <h2>Transactions Broadcasted</h2>
         <div v-for="transaction in transactions">
           {{transaction}}<br>
