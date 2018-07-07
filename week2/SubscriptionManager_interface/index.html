@@ -11,51 +11,53 @@
 </head>
 
 <body>
-  <div class ="warnings" hidden='true' >
-    <div id="noWeb3AccountWarning" hidden='true' align='center' class = "row">
-      <div class="alert alert-danger col-md-offset-3 col-md-6" style='display:inline-block;'>
-        <p><strong>No Ethereum account found.</strong></p>
-        <p>You are currently unable to initiate any commands. Make sure Metamask is installed and unlocked, and refresh.</p>
+  <div class="container-fluid site-main">
+    <div class ="warnings" hidden='true' >
+      <div id="noWeb3AccountWarning" hidden='true' align='center' class = "row">
+        <div class="alert alert-danger col-md-offset-3 col-md-6" style='display:inline-block;'>
+          <p><strong>No Ethereum account found.</strong></p>
+          <p>You are currently unable to initiate any commands. Make sure Metamask is installed and unlocked, and refresh.</p>
+        </div>
+      </div>
+      <div id="networkWarning" hidden='true' align='center' class = "row" >
+        <div class="alert alert-danger col-md-offset-3 col-md-6" style='display:inline-block;'>
+          <p><strong>You are currently operating on the Ropsten testnet.</strong></p>
+          <p>To interact with a real contract, change your Metamask network to the "Main" Ethereum network, and refresh.</p>
+        </div>
       </div>
     </div>
-    <div id="networkWarning" hidden='true' align='center' class = "row" >
-      <div class="alert alert-danger col-md-offset-3 col-md-6" style='display:inline-block;'>
-        <p><strong>You are currently operating on the Ropsten testnet.</strong></p>
-        <p>To interact with a real contract, change your Metamask network to the "Main" Ethereum network, and refresh.</p>
-      </div>
-    </div>
-  </div>
-  <div id="app">
-    Connection status: {{connectionStatusOutput}}<br>
-    <h2>Web3 Connection Info</h2>
-      Network ID: {{networkIDOutput}}<br>
-      User address: {{userAddressOutput}}
-    <h2>Create New SubscriptionManager</h2>
-      <button onclick="callNewSubscriptionManager()">Create New SubscriptionManager</button>
-    <h2>Transactions Broadcasted</h2>
-      <div v-for="transaction in transactions">
-        {{transaction}}<br>
-      </div>
-    <h1>SubscriptionManager Interaction</h1>
-      SubscriptionManager contract address: <input v-model="SMAddressInput"><br>
-      <div v-show="SMAddressInput != ''" id="SMInterface">
+    <div id="app">
+      Connection status: {{connectionStatusOutput}}<br>
+      <h2>Web3 Connection Info</h2>
+        Network ID: {{networkIDOutput}}<br>
+        User address: {{userAddressOutput}}
+      <h2>Create New SubscriptionManager</h2>
+        <button onclick="callNewSubscriptionManager()">Create New SubscriptionManager</button>
+      <h2>Transactions Broadcasted</h2>
+        <div v-for="transaction in transactions">
+          {{transaction}}<br>
+        </div>
+      <h1>SubscriptionManager Interaction</h1>
+        SubscriptionManager contract address: <input v-model="SMAddressInput"><br>
+        <div v-show="SMAddressInput != ''" id="SMInterface">
+          <br>
+          QR code for depositing:<br>
+          <div id="SMAddressQR"></div><br>
+          <button onclick="triggerDeposit()">deposit</button><br>
+          <br>
+          Owner: {{SMOwner}}<br>
+          <button onclick="triggerWithdraw()">withdraw</button><br>
+          <br>
+          <button onclick="callCallBill()">trigger bill</buton>
+        </div>
+      <h2>Biller Info</h2>
+        Address: <input v-model="billerAddressInput"><br>
         <br>
-        QR code for depositing:<br>
-        <div id="SMAddressQR"></div><br>
-        <button onclick="triggerDeposit()">deposit</button><br>
-        <br>
-        Owner: {{SMOwner}}<br>
-        <button onclick="triggerWithdraw()">withdraw</button><br>
-        <br>
-        <button onclick="callCallBill()">trigger bill</buton>
-      </div>
-    <h2>Biller Info</h2>
-      Address: <input v-model="billerAddressInput"><br>
-      <br>
-      Billing Rate: {{billingRateOutput}}<br>
-      Last Billed: {{lastBilledOutput}}<br>
-      <button v-show="userIsOwner" onclick="callSetBillRate()">Change Biller Rate</button>
+        Billing Rate: {{billingRateOutput}}<br>
+        Last Billed: {{lastBilledOutput}}<br>
+        <button v-show="userIsOwner" onclick="callSetBillRate()">Change Biller Rate</button>
 
+    </div>
   </div>
 
 </body>
