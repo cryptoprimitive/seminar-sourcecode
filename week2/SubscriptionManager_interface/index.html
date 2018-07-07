@@ -41,19 +41,20 @@
         <div class="col-sm-6">
           <h2>Deposit/Withdraw</h2>
             <div class="well well-sm">
-              QR code for depositing:<br>
-              <div id="SMAddressQR"></div><br>
+              <div>Owner: {{SMOwner}}</div>
+              <div>
+                QR code for depositing:<br>
+                <div id="SMAddressQR"></div>
+              </div>
               <button class="btn btn-primary" onclick="triggerDeposit()">deposit</button><br>
-              <br>
-              Owner: {{SMOwner}}<br>
-              <button class="btn btn-primary" onclick="triggerWithdraw()">withdraw</button><br>
+              <button v-show="userIsOwner" class="btn btn-primary" onclick="triggerWithdraw()">withdraw</button><br>
               <br>
             </div>
         </div>
         <div class="col-sm-6">
           <h2>Billing</h2>
             <div class="well well-sm">
-                <button class="btn btn-primary" onclick="callCallBill()">trigger bill</button>
+              <div v-show="userCanBill"><button class="btn btn-primary" onclick="callCallBill()">Bill this SM contract</button></div>
               Address: <input v-model="billerAddressInput"><br>
               <br>
               Billing Rate: {{billingRateOutput}}<br>
@@ -62,7 +63,7 @@
             </div>
         </div>
       </div>
-      <div class="row" v-if="transactions.length > 0">
+      <div class="row" v-show="transactions.length > 0">
         <h2>Transactions Broadcasted</h2>
           <div class="mainBlock transactions">
             <div class="well well-sm row">

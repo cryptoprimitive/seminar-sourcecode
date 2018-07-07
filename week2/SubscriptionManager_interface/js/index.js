@@ -11,7 +11,8 @@ window.onload = function() {
       billerAddressInput: "",
       billingRateInput: "",
       billingRateOutput: "Loading...",
-      lastBilledOutput: "Loading..."
+      lastBilledOutput: "Loading...",
+      userCanBill: false
     },
     computed: {
       SMContractInstance: function() {
@@ -27,10 +28,17 @@ window.onload = function() {
         $("#SMAddressQR").html("");
         $("#SMAddressQR").qrcode(this.SMAddressInput);
 
-        // Update output variables
+        // Update owner output
         this.SMContractInstance.Owner({}, function(err, res) {
           console.log(res);
           window.app.SMOwner = res;
+        });
+
+        // Update userCanBill
+        this.SMContractInstance.billers(this.userAddressOutput, function(err, res) {
+          billingRateInWeiPerSecond = res[0];
+
+          window.app.userCanBill = (billingRateInWeiPerSecond > 0);
         });
       },
       billerAddressInput: function() {
