@@ -1,16 +1,38 @@
 pragma solidity ^0.4.24;
 
-contract BillableWalletFactory {
+contract WalletFactory {
+    address[] public walletAddresses;
     address[] public billableWalletAddresses;
+    address[] public timeLockWalletAddresses;
+
+    function newWallet()
+    external
+    returns (address) {
+        address newAddress = (new Wallet)(msg.sender);
+
+        walletAddresses.push(newAddress);
+
+        return newAddress;
+    }
 
     function newBillableWallet()
     external
     returns (address) {
-        address newBWAddress = (new BillableWallet)(msg.sender);
+        address newAddress = (new BillableWallet)(msg.sender);
 
-        billableWalletAddresses.push(newBWAddress);
+        billableWalletAddresses.push(newAddress);
 
-        return newBWAddress;
+        return newAddress;
+    }
+
+    function newTimeLockWallet(uint _unlockTime)
+    external
+    returns (address) {
+        address newAddress = (new TimeLockWallet)(msg.sender, _unlockTime);
+
+        timeLockWalletAddresses.push(newAddress);
+
+        return newAddress;
     }
 }
 
@@ -36,7 +58,7 @@ contract Wallet {
     }
 
     function withdraw(uint amount)
-    external
+    public
     onlyOwner {
         require(amount <= address(this).balance, "Requested withdraw amount exceeds balance");
         Owner.transfer(amount);
@@ -93,5 +115,22 @@ contract BillableWallet is Wallet {
         billers[billerAddress].rate = newRate;
 
         emit BillRateSet(billerAddress, newRate);
+    }
+}
+
+contract TimeLockWallet is Wallet {
+    uint public unlockTime;
+
+    constructor(address _Owner, uint _unlockTime)
+    Wallet(_Owner) {
+        require(_unlockTime > now);
+        unlockTime = _unlockTime;
+    }
+
+    function withdraw(uint amount)
+    public {
+        require(now > unlockTime, "The time lock has not yet been released");
+
+        Wallet.withdraw(amount);
     }
 }
