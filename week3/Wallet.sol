@@ -1,16 +1,22 @@
 pragma solidity ^0.4.24;
 
 contract WalletFactory {
-    address[] public walletAddresses;
+    address[] public basicWalletAddresses;
     address[] public billableWalletAddresses;
     address[] public timeLockWalletAddresses;
 
-    function newWallet()
+    event BasicWalletCreated(address walletAddress);
+    event BillableWalletCreated(address walletAddress);
+    event TimeLockWalletCreated(address walletAddress);
+
+    function newBasicWallet()
     external
     returns (address) {
-        address newAddress = (new Wallet)(msg.sender);
+        address newAddress = (new BasicWallet)(msg.sender);
 
-        walletAddresses.push(newAddress);
+        basicWalletAddresses.push(newAddress);
+
+        emit BasicWalletCreated(newAddress);
 
         return newAddress;
     }
@@ -22,6 +28,8 @@ contract WalletFactory {
 
         billableWalletAddresses.push(newAddress);
 
+        emit BillableWalletCreated(newAddress);
+
         return newAddress;
     }
 
@@ -32,11 +40,13 @@ contract WalletFactory {
 
         timeLockWalletAddresses.push(newAddress);
 
+        emit TimeLockWalletCreated(newAddress);
+
         return newAddress;
     }
 }
 
-contract Wallet {
+contract BasicWallet {
     address public Owner;
     modifier onlyOwner() {
         require(msg.sender == Owner);
@@ -67,11 +77,9 @@ contract Wallet {
     }
 }
 
-contract BillableWallet is Wallet {
+contract BillableWallet is BasicWallet {
     constructor(address _Owner)
-    Wallet(_Owner) {
-
-    }
+    BasicWallet(_Owner) {}
 
     event BillRateSet(address billerAddress, uint newRate);
     event BillProcessed(address billerAddress, uint amountBilled);
@@ -118,11 +126,11 @@ contract BillableWallet is Wallet {
     }
 }
 
-contract TimeLockWallet is Wallet {
+contract TimeLockWallet is BasicWallet {
     uint public unlockTime;
 
     constructor(address _Owner, uint _unlockTime)
-    Wallet(_Owner) {
+    BasicWallet(_Owner) {
         require(_unlockTime > now);
         unlockTime = _unlockTime;
     }
@@ -131,6 +139,6 @@ contract TimeLockWallet is Wallet {
     public {
         require(now > unlockTime, "The time lock has not yet been released");
 
-        Wallet.withdraw(amount);
+        BasicWallet.withdraw(amount);
     }
 }
