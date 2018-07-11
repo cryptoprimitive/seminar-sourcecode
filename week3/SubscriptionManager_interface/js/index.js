@@ -2,21 +2,33 @@ window.onload = function() {
   window.app = new Vue({
     el: '#app',
     data: {
+      WALLETTYPE_BASIC: 0,
+      WALLETTYPE_BILLABLE: 1,
+      WALLETTYPE_TIMELOCK: 2,
       userAddressOutput: "Loading...``",
       networkIDOutput: "Loading...",
       FactoryAddressOutput: "Loading...",
       transactions: [],
-      WalletAddressInput: "",
+      walletAddress: "",
+      walletType: 0,
       WalletOwner: "Loading...",
-      /*billerAddressInput: "",
+      billerAddressInput: "",
       billingRateInput: "",
       billingRateOutput: "Loading...",
       lastBilledOutput: "Loading...",
-      userCanBill: false*/
+      userCanBill: false
     },
     computed: {
       WalletContractInstance: function() {
-        return web3.eth.contract(WalletABI).at(this.WalletAddressInput);
+        if (this.walletType == this.WALLETTYPE_BASIC) {
+          return web3.eth.contract(BasicWalletABI).at(this.walletAddress);
+        }
+        else if (this.walletType == this.WALLETTYPE_BILLABLE) {
+          return web3.eth.contract(BillableWalletABI).at(this.walletAddress);
+        }
+        else if (this.walletType == this.WALLETTYPE_TIMELOCK) {
+          return web3.eth.contract(TimeLockWalletABI).at(this.walletAddress);
+        }
       },
       userIsOwner: function() {
         return (web3.eth.accounts[0] == this.WalletOwner);
@@ -26,7 +38,7 @@ window.onload = function() {
       WalletContractInstance: function() {
         // Update address QR code
         $("#WalletAddressQR").html("");
-        $("#WalletAddressQR").qrcode(this.WalletAddressInput);
+        $("#WalletAddressQR").qrcode(this.walletAddress);
 
         // Update owner output
         this.WalletContractInstance.Owner({}, function(err, res) {
@@ -34,14 +46,19 @@ window.onload = function() {
           window.app.WalletOwner = res;
         });
 
+        if (this.walletType == this.WALLETTYPE_BILLABLE) {
         // Update userCanBill
-        /*this.WalletContractInstance.billers(this.userAddressOutput, function(err, res) {
-          billingRateInWeiPerSecond = res[0];
+          this.WalletContractInstance.billers(this.userAddressOutput, function(err, res) {
+            billingRateInWeiPerSecond = res[0];
 
-          window.app.userCanBill = (billingRateInWeiPerSecond > 0);
-        });*/
+            window.app.userCanBill = (billingRateInWeiPerSecond > 0);
+          });
+        }
       },
-      /*billerAddressInput: function() {
+      billerAddressInput: function() {
+        if (this.walletType != this.WALLETTYPE_BILLABLE) {
+          return;
+        }
         this.WalletContractInstance.billers(this.billerAddressInput, function(err, res) {
           billingRateInWeiPerSecond = res[0];
           lastBilledTimestamp = res[1];
@@ -52,7 +69,7 @@ window.onload = function() {
           window.app.billingRateOutput = Number(billingRateInEthPerMonth);
           window.app.lastBilledOutput = Number(lastBilledTimestamp);
         })
-      }*/
+      }
     }
   });
 
@@ -85,12 +102,6 @@ window.onload = function() {
 
   app.FactoryAddressOutput = WalletFactoryAddress;
 
-  // window.contractInstance.DepositHolder({}, function(err, res) {
-  //   $('#DepositHolderOutput').text(res);
-  // });
-  // window.contractInstance.DepositSubmitter({}, function(err, res) {
-  //   $('#DepositSubmitterOutput').text(res);
-  // });
   // web3.eth.getBalance(contractAddress, function(err, res) {
   //   weiValue = res;
   //   etherValue = web3.fromWei(res, 'ether');
@@ -98,17 +109,59 @@ window.onload = function() {
   // });
 
   window.WalletFactoryInstance = web3.eth.contract(WalletFactoryABI).at(WalletFactoryAddress);
+
+  window.WalletFactoryInstance.BasicWalletCreated(function(err, res) {
+    var found = false;
+    for (var i=0; i<window.app.transactions.length; i++) {
+      if (window.app.transactions[i].tx == res['transactionHash']) {
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      window.app.walletAddress = res['args']['walletAddress'];
+      window.app.walletType = window.app.WALLETTYPE_BASIC;
+    }
+  });
+  window.WalletFactoryInstance.BillableWalletCreated(function(err, res) {
+    var found = false;
+    for (var i=0; i<window.app.transactions.length; i++) {
+      if (window.app.transactions[i].tx == res['transactionHash']) {
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      window.app.walletAddress = res['args']['walletAddress'];
+      window.app.walletType = window.app.WALLETTYPE_BILLABLE;
+    }
+  });
+  window.WalletFactoryInstance.TimeLockWalletCreated(function(err, res) {
+    var found = false;
+    for (var i=0; i<window.app.transactions.length; i++) {
+      if (window.app.transactions[i].tx == res['transactionHash']) {
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      window.app.walletAddress = res['args']['walletAddress'];
+      window.app.walletType = window.app.WALLETTYPE_TIMELOCK;
+    }
+  });
 }
 
-function callNewWallet() {
+function callNewBasicWallet() {
   txObject = {gas: 600000, gasPrice: web3.toWei(20, 'gwei')};
   console.log(WalletFactoryAddress);
-  window.WalletFactoryInstance.newWallet(txObject, function(err, res) {
+  window.WalletFactoryInstance.newBasicWallet(txObject, function(err, res) {
     if (err) {
       console.log(err);
     }
     else {
-      app.transactions.push("Create Basic Wallet contract tx: " + res);
+      txOutputObject = {'string':"Create Basic Wallet contract tx: " + res,
+                        'tx':res};
+      app.transactions.push(txOutputObject);
     }
   });
 }
@@ -119,7 +172,9 @@ function callNewBillableWallet() {
       console.log(err);
     }
     else {
-      app.transactions.push("Create Billable Wallet contract tx: " + res);
+      txOutputObject = {'string':"Create Billable Wallet contract tx: " + res,
+                        'tx':res};
+      app.transactions.push(txOutputObject);
     }
   });
 }
@@ -130,7 +185,9 @@ function callNewTimeLockWallet() {
       console.log(err);
     }
     else {
-      app.transactions.push("Create Time-Locked Wallet contract tx: " + res);
+      txOutputObject = {'string':"Create Time-Locked Wallet contract tx: " + res,
+                        'tx':res};
+      app.transactions.push(txOutputObject);
     }
   });
 }
@@ -141,7 +198,7 @@ function triggerDeposit() {
   depositAmountInWei = web3.toWei(depositAmountInEth, 'ether');
 
   txObject = {value: depositAmountInWei,
-              to: window.app.WalletAddressInput,
+              to: window.app.walletAddress,
               gasPrice: web3.toWei(10, 'gwei')};
 
   web3.eth.sendTransaction(txObject, function(err, res) {
@@ -170,9 +227,9 @@ function triggerWithdraw() {
   });
 }
 
-/*function callCallBill() {
+function callCallBill() {
   txObject = {gas: 600000, gasPrice: web3.toWei(10, 'gwei')};
-  window.app.SMContractInstance.callBill(txObject, function(err, res) {
+  window.app.walletInstance.callBill(txObject, function(err, res) {
     if (err) {
       console.log("Error calling callBill: " + err);
     }
@@ -190,7 +247,7 @@ function callSetBillRate() {
   billingRateInWeiPerSecond = billingRateInWeiPerMonth/(30*24*60*60);
 
   txObject = {gas: 600000, gasPrice: web3.toWei(10, 'gwei')};
-  window.app.SMContractInstance.setBillRate(billerAddress, billingRateInWeiPerSecond, txObject, function(err, res) {
+  window.app.walletInstance.setBillRate(billerAddress, billingRateInWeiPerSecond, txObject, function(err, res) {
     if (err) {
       console.log("Error calling setBillRate: " + err);
     }
@@ -198,4 +255,4 @@ function callSetBillRate() {
       app.transactions.push("setBillRate tx: " + res);
     }
   });
-}*/
+}

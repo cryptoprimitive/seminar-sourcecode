@@ -1,66 +1,33 @@
-WalletFactoryAddress = "0x5b2Ac69f97D12DAcaE3a0B63C39087755C618F19";
+WalletFactoryAddress = "0x42773E9c129D65AEdD66C0a3CF01Be5d33Ee9D1B";
 WalletFactoryABI = [
 	{
-		"constant": true,
+		"anonymous": false,
 		"inputs": [
 			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "timeLockWalletAddresses",
-		"outputs": [
-			{
-				"name": "",
+				"indexed": false,
+				"name": "walletAddress",
 				"type": "address"
 			}
 		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
+		"name": "BasicWalletCreated",
+		"type": "event"
 	},
 	{
-		"constant": false,
+		"anonymous": false,
 		"inputs": [
 			{
-				"name": "_unlockTime",
-				"type": "uint256"
-			}
-		],
-		"name": "newTimeLockWallet",
-		"outputs": [
-			{
-				"name": "",
+				"indexed": false,
+				"name": "walletAddress",
 				"type": "address"
 			}
 		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "walletAddresses",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
+		"name": "BillableWalletCreated",
+		"type": "event"
 	},
 	{
 		"constant": false,
 		"inputs": [],
-		"name": "newWallet",
+		"name": "newBasicWallet",
 		"outputs": [
 			{
 				"name": "",
@@ -86,6 +53,56 @@ WalletFactoryABI = [
 		"type": "function"
 	},
 	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_unlockTime",
+				"type": "uint256"
+			}
+		],
+		"name": "newTimeLockWallet",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "walletAddress",
+				"type": "address"
+			}
+		],
+		"name": "TimeLockWalletCreated",
+		"type": "event"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "basicWalletAddresses",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"constant": true,
 		"inputs": [
 			{
@@ -94,6 +111,25 @@ WalletFactoryABI = [
 			}
 		],
 		"name": "billableWalletAddresses",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "timeLockWalletAddresses",
 		"outputs": [
 			{
 				"name": "",
@@ -357,7 +393,7 @@ TimeLockWalletABI = [
 		"type": "event"
 	}
 ];
-WalletABI = [
+BasicWalletABI = [
 	{
 		"constant": false,
 		"inputs": [

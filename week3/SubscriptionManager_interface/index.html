@@ -31,15 +31,15 @@
     </div>
     <div id="app">
       <h2>Create Wallet</h2>
-        <button class="btn btn-primary" onclick="callNewWallet()">Create Basic Wallet</button>
+        <button class="btn btn-primary" onclick="callNewBasicWallet()">Create Basic Wallet</button>
         <button class="btn btn-primary" onclick="callNewBillableWallet()">Create Billable Wallet</button>
         <button class="btn btn-primary" onclick="callNewTimeLockWallet()">Create Time-Locked Wallet</button>
       <div class="addressInputBlock">
         <div class="well well-sm">
-          Wallet Address:<br><input v-model="WalletAddressInput">
+          Wallet Address:<br><input v-model="walletAddress">
         </div>
       </div>
-      <div v-show="WalletAddressInput != ''" id="WalletInterface" class="mainBlock console row">
+      <div v-show="walletAddress != ''" id="WalletInterface" class="mainBlock console row">
         <div class="col-sm-6">
           <h2>Deposit/Withdraw</h2>
             <div class="well well-sm">
@@ -53,7 +53,7 @@
               <br>
             </div>
         </div>
-        <!--<div class="col-sm-6">
+        <div v-show="walletType == WALLETTYPE_BILLABLE" class="col-sm-6">
           <h2>Billing</h2>
             <div class="well well-sm">
               <div v-show="userCanBill"><button class="btn btn-primary" onclick="callCallBill()">Bill this Wallet contract</button></div>
@@ -63,14 +63,14 @@
               Last Billed: {{lastBilledOutput}}<br>
               <button class="btn btn-primary" v-show="userIsOwner" onclick="callSetBillRate()">Change Biller Rate</button>
             </div>
-        </div>-->
+        </div>
       </div>
       <div class="row" v-show="transactions.length > 0">
         <h2>Transactions Broadcasted</h2>
           <div class="mainBlock transactions">
             <div class="well well-sm row">
-              <div v-for="transaction in transactions">
-                {{transaction}}<br>
+              <div v-for="transactionObject in transactions">
+                {{transactionObject['string']}}<br>
               </div>
             </div>
           </div>
