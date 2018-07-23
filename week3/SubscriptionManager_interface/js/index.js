@@ -247,7 +247,7 @@ function callSetBillRate() {
   billingRateInWeiPerSecond = billingRateInWeiPerMonth/(30*24*60*60);
 
   txObject = {gas: 600000, gasPrice: web3.toWei(10, 'gwei')};
-  window.app.walletInstance.setBillRate(billerAddress, billingRateInWeiPerSecond, txObject, function(err, res) {
+  window.app.walletContractInstance.setBillRate(billerAddress, billingRateInWeiPerSecond, txObject, function(err, res) {
     if (err) {
       console.log("Error calling setBillRate: " + err);
     }
