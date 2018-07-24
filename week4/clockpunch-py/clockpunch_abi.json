@@ -1,0 +1,33 @@
+[
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_action",
+				"type": "string"
+			}
+		],
+		"name": "punch",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "agent",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "action",
+				"type": "string"
+			}
+		],
+		"name": "PunchEvent",
+		"type": "event"
+	}
+]
