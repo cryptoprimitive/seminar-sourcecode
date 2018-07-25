@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 contract Punchclock {
-    event PunchEvent(address indexed agent, string indexed action);
+    event PunchEvent(address agent, string action);
 
     function punch(string _action)
     external {
