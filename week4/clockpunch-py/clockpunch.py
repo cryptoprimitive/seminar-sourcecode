@@ -15,25 +15,32 @@ userAddress = "0x82A3aE9989DF4a175cb2a39B26bb79cED17d943A"
 
 print(w3.fromWei(w3.eth.getBalance(userAddress), 'ether'))
 
-def clockIn():
+def callPunchWithString(s):
     tx = {'value': 0,
           'nonce': w3.eth.getTransactionCount(userAddress),
           'chainId': 3, # 3 = Ropsten
           'gasPrice': w3.toWei(20, 'gwei')
           }
 
-    tx['gas'] = contract.functions.punch("in").estimateGas()*2
+    tx['gas'] = contract.functions.punch(s).estimateGas()*2
 
-    builtTx = contract.functions.punch("in").buildTransaction(tx)
+    builtTx = contract.functions.punch(s).buildTransaction(tx)
     builtTx['gasPrice'] = w3.toWei(20, 'gwei')
 
     signed = w3.eth.account.signTransaction(builtTx, priv)
 
-    print(builtTx)
-    print(signed.rawTransaction)
+    #print(builtTx)
+    #print(signed.rawTransaction)
 
     return w3.eth.sendRawTransaction(signed.rawTransaction)
 
-txHashBytes = clockIn()
-print(txHashBytes)
-print(w3.toHex(txHashBytes))
+def clockIn():
+    return w3.toHex(callPunchWithString("in"))
+
+def clockOut():
+    return w3.toHex(callPunchWithString("out"))
+
+
+#txHashBytes = clockIn()
+#print(txHashBytes)
+#print(w3.toHex(txHashBytes))

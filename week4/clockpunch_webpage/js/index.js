@@ -7,14 +7,18 @@ window.onload = function() {
       networkIDOutput: "Loading...",
       transactions: [],
       agentAddressInput: "",
-      punchActions: [],
-      hoursWorked: 0
+      punchActionsForAgent: [],
+      secondsWorked: 0,
+      punchActionOutputVars: []
     },
     computed: {
       clockpunchContractInstance: function() {
         return web3.eth.contract(clockpunchABI).at(clockpunchAddress)
+      },
+      humanizedTimeWorked: function() {
+        return humanizeDuration(this.secondsWorked*1000, {largest: 2});
       }
-    }
+    },
   });
 
   web3.version.getNetwork((err, netId) => {
@@ -57,11 +61,11 @@ function getPunchEventsFromAgent() {
       window.allPunchEvents = res;
     }
 
-    eventsFromAgent = [];
+    window.app.punchActionsForAgent = [];
     for (var i=0; i<window.allPunchEvents.length; i++) {
       if (window.allPunchEvents[i].args['agent'].toLowerCase() == window.app.agentAddressInput.toLowerCase()) {
         console.log(allPunchEvents[i]);
-        window.app.punchActions.push(allPunchEvents[i])
+        window.app.punchActionsForAgent.push(allPunchEvents[i])
       }
     }
 
@@ -71,29 +75,39 @@ function getPunchEventsFromAgent() {
     var inActionTime = 0;
     var outActionFound = false;
 
-    for (var i=0; i<window.app.punchActions.length; i++) {
+    for (var i=0; i<window.app.punchActionsForAgent.length; i++) {
       if (inActionFound && outActionFound) {
         inActionFound = false;
         inActionTime = 0;
         outActionFound = false;
       }
       if (!inActionFound && !outActionFound) {
-        if (window.app.punchActions[i].args['action'] == "in") {
+        if (window.app.punchActionsForAgent[i].args['action'] == "in") {
           inActionFound = true;
-          inActionTime = window.app.punchActions[i].args['time'];
-          continue;
+          inActionTime = window.app.punchActionsForAgent[i].args['time'];
+          window.app.punchActionOutputVars.push({time: inActionTime,
+                                                 action: "in",
+                                                 secondsAdded: 0});
         }
       }
       else if (inActionFound && !outActionFound) {
-        if (window.app.punchActions[i].args['action'] == "out") {
+        if (window.app.punchActionsForAgent[i].args['action'] == "out") {
           outActionFound = true;
-          var outActionTime = window.app.punchActions[i].args['time'];
-          secondsWorked += (outActionTime - inActionTime);
-          continue;
+          var outActionTime = window.app.punchActionsForAgent[i].args['time'];
+          var secondsToAdd = (outActionTime - inActionTime)
+          secondsWorked += secondsToAdd;
+          window.app.punchActionOutputVars.push({time: outActionTime,
+                                                 action: "out",
+                                                 secondsAdded: secondsToAdd});
         }
+      }
+      else {
+        window.app.punchActionOutputVars.push({time: window.app.punchActionsForAgent[i].args['time'],
+                                               action: window.app.punchActionsForAgent[i].args['action'],
+                                               secondsAdded: 0});
       }
     }
 
-    window.app.hoursWorked = secondsWorked/(60.0*60.0);
+    window.app.secondsWorked = secondsWorked;
   });
 }

@@ -6,7 +6,7 @@
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <!-- WARNING: I haven't personally vetted the following QRcode library. This should be addressed before moving to production or popularizing this tool.-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
-  <script src="libs/humanize-duration"></script>
+  <script src="libs/humanize-duration.js"></script>
   <script src="js/contractInfo.js"></script>
   <script src="js/index.js"></script>
 </head>
@@ -14,7 +14,7 @@
 <body>
   <div class="container-fluid site-main">
     <div class="header" >
-      <div class="title" align='center' ><h1 >Wallet Utility</h1></div>
+      <div class="title" align='center' ><h1 >Clockpunch Hours Tally</h1></div>
     </div>
     <div class ="warnings" hidden='true' >
       <div id="noWeb3AccountWarning" hidden='true' align='center' class = "row">
@@ -35,7 +35,24 @@
         <div class="mainBlock">
           <div class="well well-sm row">
             Address: <input v-model="agentAddressInput">
-            <button onclick="getPunchEventsFromAgent()">Get punch events by agent</button>
+            <button onclick="getPunchEventsFromAgent()">Get punch events by agent</button><br>
+            Time worked: {{humanizedTimeWorked}}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>In/Out</th>
+                  <th>Time added</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="punchActionOutputDict in punchActionOutputVars">
+                  <td>{{punchActionOutputDict['time']}}</td>
+                  <td>{{punchActionOutputDict['action']}}</td>
+                  <td>{{punchActionOutputDict['secondsAdded']}}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
