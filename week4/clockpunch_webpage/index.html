@@ -7,6 +7,7 @@
   <!-- WARNING: I haven't personally vetted the following QRcode library. This should be addressed before moving to production or popularizing this tool.-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
   <script src="libs/humanize-duration.js"></script>
+  <script src="libs/moment.min.js"></script>
   <script src="js/contractInfo.js"></script>
   <script src="js/index.js"></script>
 </head>
@@ -47,9 +48,9 @@
               </thead>
               <tbody>
                 <tr v-for="punchActionOutputDict in punchActionOutputVars">
-                  <td>{{punchActionOutputDict['time']}}</td>
+                  <td>{{punchActionOutputDict['humanizedTimestamp']}}</td>
                   <td>{{punchActionOutputDict['action']}}</td>
-                  <td>{{punchActionOutputDict['secondsAdded']}}</td>
+                  <td>{{punchActionOutputDict['humanizedTimeAdded']}}</td>
                 </tr>
               </tbody>
             </table>

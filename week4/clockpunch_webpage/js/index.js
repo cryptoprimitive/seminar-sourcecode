@@ -52,19 +52,19 @@ window.onload = function() {
 }
 
 function getPunchEventsFromAgent() {
+  var timestampFormatString = "YYYY.MM.DD HH:mm:ss";
+
   eventFilter = window.app.clockpunchContractInstance.PunchEvent({}, {fromBlock: 3700000, toBlock:'latest'});
 
   eventFilter.get( (err, res) => {
     if (err) console.log("error in event fetch:", err);
     else {
-      console.log(res);
       window.allPunchEvents = res;
     }
 
     window.app.punchActionsForAgent = [];
     for (var i=0; i<window.allPunchEvents.length; i++) {
       if (window.allPunchEvents[i].args['agent'].toLowerCase() == window.app.agentAddressInput.toLowerCase()) {
-        console.log(allPunchEvents[i]);
         window.app.punchActionsForAgent.push(allPunchEvents[i])
       }
     }
@@ -75,36 +75,42 @@ function getPunchEventsFromAgent() {
     var inActionTime = 0;
     var outActionFound = false;
 
+    window.app.punchActionOutputVars = []
+
     for (var i=0; i<window.app.punchActionsForAgent.length; i++) {
       if (inActionFound && outActionFound) {
         inActionFound = false;
         inActionTime = 0;
         outActionFound = false;
       }
-      if (!inActionFound && !outActionFound) {
-        if (window.app.punchActionsForAgent[i].args['action'] == "in") {
-          inActionFound = true;
-          inActionTime = window.app.punchActionsForAgent[i].args['time'];
-          window.app.punchActionOutputVars.push({time: inActionTime,
-                                                 action: "in",
-                                                 secondsAdded: 0});
-        }
+      if (!inActionFound && !outActionFound && window.app.punchActionsForAgent[i].args['action'] == "in") {
+        inActionFound = true;
+        inActionTime = window.app.punchActionsForAgent[i].args['time'].toNumber();
+        window.app.punchActionOutputVars.push({time: inActionTime,
+                                               action: "in",
+                                               secondsAdded: 0,
+                                               humanizedTimeAdded: humanizeDuration(0, {largest:2}),
+                                               humanizedTimestamp: moment.unix(inActionTime).format(timestampFormatString)});
       }
-      else if (inActionFound && !outActionFound) {
-        if (window.app.punchActionsForAgent[i].args['action'] == "out") {
-          outActionFound = true;
-          var outActionTime = window.app.punchActionsForAgent[i].args['time'];
-          var secondsToAdd = (outActionTime - inActionTime)
-          secondsWorked += secondsToAdd;
-          window.app.punchActionOutputVars.push({time: outActionTime,
-                                                 action: "out",
-                                                 secondsAdded: secondsToAdd});
-        }
+      else if (inActionFound && !outActionFound && window.app.punchActionsForAgent[i].args['action'] == "out") {
+        outActionFound = true;
+        var outActionTime = window.app.punchActionsForAgent[i].args['time'].toNumber();
+        var secondsToAdd = (outActionTime - inActionTime)
+        secondsWorked += secondsToAdd;
+        window.app.punchActionOutputVars.push({time: outActionTime,
+                                               action: "out",
+                                               secondsAdded: secondsToAdd,
+                                               humanizedTimeAdded: humanizeDuration(secondsToAdd*1000, {largest:2}),
+                                               humanizedTimestamp: moment.unix(outActionTime).format(timestampFormatString)});
       }
       else {
-        window.app.punchActionOutputVars.push({time: window.app.punchActionsForAgent[i].args['time'],
+        console.log(window.app.punchActionsForAgent[i]);
+        var actionTime = window.app.punchActionsForAgent[i].args['time'].toNumber()
+        window.app.punchActionOutputVars.push({time: actionTime,
                                                action: window.app.punchActionsForAgent[i].args['action'],
-                                               secondsAdded: 0});
+                                               secondsAdded: 0,
+                                               humanizedTimeAdded: humanizeDuration(0, {largest:2}),
+                                               humanizedTimestamp: moment.unix(actionTime).format(timestampFormatString)});
       }
     }
 

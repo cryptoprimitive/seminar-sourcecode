@@ -1,4 +1,4 @@
-import json, pprint, binascii
+import json, pprint, binascii, sys
 from web3 import Web3
 
 from contractinfo import clockpunchAddress, clockpunchABI
@@ -40,7 +40,9 @@ def clockIn():
 def clockOut():
     return w3.toHex(callPunchWithString("out"))
 
-
-#txHashBytes = clockIn()
-#print(txHashBytes)
-#print(w3.toHex(txHashBytes))
+if __name__ == "__main__":
+    if len(sys.argv) >= 2:
+        txid = callPunchWithString(sys.argv[1])
+        print("Waiting to mine:", w3.toHex(txid))
+        receipt = w3.eth.waitForTransactionReceipt(txid)
+        print("Mined!")
