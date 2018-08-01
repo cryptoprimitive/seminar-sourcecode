@@ -1,18 +1,6 @@
 const ipfs = window.IpfsApi('ipfs.infura.io', '5001', {protocol: 'https'})
 const Buffer = window.IpfsApi().Buffer
 
-function uploadToIpfs(toStore, ipfsHashHandler) {
-  ipfs.add(new Buffer(toStore), function (err, res) {
-    if (err || !res) {
-      return console.error('ipfs add error', err, res)
-    }
-    res.forEach(function (file) {
-      console.log('successfully stored', file.hash)
-      ipfsHashHandler(file.hash)
-    })
-  })
-}
-
 window.onload = function() {
 
   window.app = new Vue({
@@ -21,8 +9,10 @@ window.onload = function() {
       userAddressOutput: "Loading...",
       networkIDOutput: "Loading...",
       transactions: [],
-      uploadInput: "",
-      nameInput: "",
+      uploadStringInput: "",
+      stringNameInput: "",
+      fileNameInput: "",
+      processOutput: "",
       ipfsLogs: []
     },
     computed: {
@@ -62,30 +52,73 @@ window.onload = function() {
   getAllIpfsLogsFromTimestamper();
 }
 
-function uploadAndTimestamp() {
-  var dataToUpload = window.app.uploadInput;
-  var dataName = window.app.nameInput;
+function logIpfsHashToTimestamper(dataType, name, ipfsHash) {
+  dataToTimestamp = {dataType: dataType,
+                     name: name,
+                     data: ipfsHash};
 
-  //upload to ipfs, get hash
-  uploadToIpfs(dataToUpload, function(ipfsHash) {
-    dataToTimestamp = {dataType: 'ipfs',
-                       name: dataName,
-                       data: ipfsHash};
+  var data = JSON.stringify(dataToTimestamp);
 
-    var data = JSON.stringify(dataToTimestamp);
+  window.app.processOutput = "Waiting on Metamask signature...";
 
-    window.app.timestamperContractInstance.makeTimestamp(data, function(err, res) {
-      if (err) console.log("error in makeTimestamp call: ", err);
-      else {
-        txOutputObject = {'string':"Timestampt tx: " + res,
-                          'tx':res};
-        window.app.transactions.push(txOutputObject);
-      }
-    });
+  window.app.timestamperContractInstance.makeTimestamp(data, function(err, res) {
+    if (err) console.log("error in makeTimestamp call: ", err);
+    else {
+      txOutputObject = {'string':"Timestampt tx: " + res,
+                        'tx':res};
+      window.app.transactions.push(txOutputObject);
+
+      window.app.processOutput = "Transaction should mine shortly.";
+    }
   });
+}
 
-  //upload hash to contract with metadata
+function uploadStringToIpfs(toStore, ipfsHashHandler) {
+  ipfs.add(new Buffer(toStore), function (err, res) {
+    if (err || !res) {
+      return console.error('ipfs add error', err, res)
+    }
+    res.forEach(function (file) {
+      console.log('successfully stored', file.hash)
+      ipfsHashHandler(file.hash)
+    })
+  })
+}
 
+function uploadFileToIpfs(ipfsHashHandler) {
+  var toStore = document.getElementById('fileSource').files[0];
+  let reader = new window.FileReader();
+  reader.onloadend = function() {
+    ipfs.add(Buffer.from(reader.result), function (err, res) {
+
+      if (err || !res) {
+        return console.error('ipfs add error', err, res);
+      }
+      res.forEach(function (file) {
+        console.log('successfully stored', file.hash);
+        ipfsHashHandler(file.hash);
+      });
+    });
+  }
+  reader.readAsArrayBuffer(toStore);
+}
+
+function uploadStringAndTimestamp() {
+  window.app.processOutput = "Uploading string to ipfs...";
+  var dataToUpload = window.app.uploadStringInput;
+
+  uploadStringToIpfs(dataToUpload, function(ipfsHash) {
+    window.app.processOutput = "Uploaded to ipfs. Submitting to web3..."
+    logIpfsHashToTimestamper('ipfs-string', window.app.stringNameInput, ipfsHash);
+  });
+}
+
+function uploadFileAndTimestamp() {
+  window.app.processOutput = "Uploading file to ipfs...";
+  uploadFileToIpfs(function(ipfsHash) {
+    window.app.processOutput = "Uploaded to ipfs. Submitting to web3..."
+    logIpfsHashToTimestamper('ipfs-file', window.app.fileNameInput, ipfsHash);
+  })
 }
 
 function getAllIpfsLogsFromTimestamper() {
@@ -108,7 +141,7 @@ function getAllIpfsLogsFromTimestamper() {
         continue;
       }
 
-      if (parsedData['dataType'] == 'ipfs') {
+      if (parsedData['dataType'].startsWith('ipfs')) {
         var ipfsLog = {
           agent: window.allTimestampLogs[i].args['agent'],
           timestamp: window.allTimestampLogs[i].args['time'],

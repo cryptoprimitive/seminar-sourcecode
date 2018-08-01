@@ -36,13 +36,28 @@
     </div>
     <div id="app">
       <div class="row">
-        <div class="mainBlock">
-          <div class="well well-sm row">
-            <br>
-            Name: <input v-model="nameInput"><br>
-            Data: <input v-model="uploadInput"><br>
-            <button class="btn btn-basic" onclick="uploadAndTimestamp()">Upload and Timestamp</button>
+        <div class="mainBlock row">
+          <div class="well well-sm col-sm-6" style="display:inline-block">
+            <h3>Upload String</h3>
+            <p>Name: <input v-model="stringNameInput"></p>
+            <p>String: <input v-model="uploadStringInput"></p>
+            <button class="btn btn-basic" onclick="uploadStringAndTimestamp()">Upload and Timestamp</button>
           </div>
+          <div class="well well-sm col-sm-6" style="display:inline-block">
+            <h3>Upload File</h3>
+            <p>Name: <input v-model="fileNameInput"></p>
+            <p>File: <input class="form-control-file" id="fileSource" type="file"></p>
+            <button class="btn btn-basic" onclick="uploadFileAndTimestamp()">Upload and Timestamp</button>
+          </div>
+        </div>
+      </div>
+      <div class="row" v-show="processOutput != ''">
+        <div class="mainBlock">
+          <div class="col-sm-2"></div>
+          <div class="col-sm-8 well well-sm">
+            <p>{{processOutput}}</p>
+          </div>
+          <div class="col-sm-2"></div>
         </div>
       </div>
       <div class="row" v-show="transactions.length > 0">
