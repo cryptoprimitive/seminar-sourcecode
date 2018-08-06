@@ -2,12 +2,6 @@ pragma solidity ^ 0.4.24;
 
 import "browser/BurnablePayment.sol";
 
-//Where/how do we store all the extra data?
-//  - fee (%?)
-//  - deposit deadline
-//  - banks
-//  - email
-
 contract ToastytradeOfferFactory {
     address[] public toastytradeOffers;
 
@@ -33,18 +27,13 @@ contract ToastytradeOffer {
 
     string public offerDetails;
 
-    //offerDetails will be json-encoded, and stores the following info:
-    //  - fee (%?)
-    //  - deposit deadline
-    //  - banks
-    //  - email
-
     constructor(address seller, uint autoreleaseInterval, string _offerDetails)
     payable {
+        require(msg.value >= notifyServiceFee, "Not enough ether to cover the notify service fee");
+        uint valueToForwardToBP = msg.value - notifyServiceFee;
+
         //Prepare vars and create BP
         uint commitThreshold = msg.value / 3;
-
-        uint valueToForwardToBP = msg.value - notifyServiceFee;
 
         offerBP = (new BurnablePayment).value(valueToForwardToBP)(true, seller, commitThreshold, autoreleaseInterval, "", "");
 
